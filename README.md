@@ -1,2 +1,3 @@
 # alerk_pack
-alerk functions and utilities.
+
+[alerk](https://github.com/The220th/alerk) functions and utilities.
