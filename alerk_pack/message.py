@@ -288,7 +288,7 @@ class MessageWrapper:
 
     @staticmethod
     def get_all_types() -> list[int]:
-        return [MessageWrapper.MSG_TYPE_OK, MessageWrapper.MSG_TUPE_REPORT, MessageWrapper.MSG_TYPE_ERROR, MessageWrapper.MSG_TYPE_CUSTOM]
+        return [MessageWrapper.MSG_TYPE_OK, MessageWrapper.MSG_TYPE_REPORT, MessageWrapper.MSG_TYPE_ERROR, MessageWrapper.MSG_TYPE_CUSTOM]
 
     def __init__(self, msg_type: int, text: str, is_attachments: bool):
         self.msg_type: int = msg_type
