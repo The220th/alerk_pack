@@ -260,7 +260,7 @@ class MessageContainer:
 
 class MessageWrapper:
     MSG_TYPE_OK: int = 0
-    MSG_TUPE_REPORT: int = 1
+    MSG_TYPE_REPORT: int = 1
     MSG_TYPE_ERROR: int = 2
     MSG_TYPE_CUSTOM: int = 3
 
