@@ -15,14 +15,29 @@ class MessageEn(BaseModel):
     h: str
     m: List[str]  # max len 214
 
+    def to_dict(self) -> dict:
+        return {"h": self.h, "m": self.m}
+
     def to_json(self) -> str:
-        d = {"h": self.h, "m": self.m}
+        d = self.to_dict()
         return json.dumps(d, indent=4)
+
+    @staticmethod
+    def from_dict(d: dict) -> "MessageEn":
+        if "h" not in d:
+            raise ValueError("Dict must contain key \"h\". ")
+        if "m" not in d:
+            raise ValueError("Dict must contain key \"m\". ")
+        if not isinstance(d["h"], str):
+            raise ValueError("type(dict[\"h\"]) must be str. ")
+        if not isinstance(d["m"], list):
+            raise ValueError("type(dict[\"m\"]) must be list. ")
+        return MessageEn(h=d["h"], m=d["m"])
 
     @staticmethod
     def from_json(json_str: str) -> "MessageEn":
         d = json.loads(json_str)
-        return MessageEn(h=d["h"], m=d["m"])
+        return MessageEn.from_dict(d)
 
 
 class KMessage:
