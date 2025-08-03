@@ -8,7 +8,7 @@ import random
 import hashlib
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 
-from alerk_pack.crypto import bytes2str, str2bytes, asym_encrypt, asym_decrypt, gen_asym_keys, asym_sign, asym_verify, calc_key_hash
+from alerk_pack.crypto import bytes2str, str2bytes, asym_encrypt, asym_decrypt, gen_asym_keys, asym_sign, asym_verify, calc_asym_key_hash
 
 
 class MessageEn(BaseModel):
@@ -84,7 +84,7 @@ class KMessage:
         :return: {"text": {TEXT}, "raws": {RAWS}, "pub_key_hash": {PUB_KEY_HASH}, "sign": {SIGN}}
         """
         sign_key: RSAPrivateKey = from_who_priv_sign_key
-        pub_key_hash: str = calc_key_hash(from_who_pub_sign_key)
+        pub_key_hash: str = calc_asym_key_hash(from_who_pub_sign_key)
 
         hash_b: bytes = self.calc_hash().encode(encoding="utf-8")
         hash_signed_b: bytes = asym_sign(hash_b, sign_key)
@@ -134,7 +134,7 @@ class KMessage:
 
         pub_key_hash: str = d["pub_key_hash"]
         sign: bytes = str2bytes(d["sign"])
-        if calc_key_hash(from_who_pub_sign_key) != pub_key_hash:
+        if calc_asym_key_hash(from_who_pub_sign_key) != pub_key_hash:
             raise ValueError("Wrong key")
 
         res = KMessage(text, raws)

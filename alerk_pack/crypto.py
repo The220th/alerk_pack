@@ -2,10 +2,22 @@
 
 import base64
 import hashlib
+import os
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+
+class AES256Key:
+    def __init__(self, bs: bytes):
+        if len(bs) != 256//8:
+            raise ValueError(f"Len of AES256Key must be 256 bit, not {len(bs)*8}")
+        self.key: bytes = bs
+
+    def get_bytes(self) -> bytes:
+        return self.key
 
 
 def bytes2str(bs: bytes) -> str:
@@ -14,6 +26,36 @@ def bytes2str(bs: bytes) -> str:
 
 def str2bytes(s: str) -> bytes:
     return base64.b64decode(s.encode(encoding="utf-8"))
+
+
+def gen_sym_key() -> AES256Key:
+    return AES256Key(AESGCM.generate_key(bit_length=256))
+
+
+def sym_key_to_str(key: AES256Key) -> str:
+    return bytes2str(key.get_bytes())
+
+
+def str_to_sym_key(key_str: str) -> AES256Key:
+    return AES256Key(str2bytes(key_str))
+
+
+def compare_two_sym_keys(key1: AES256Key, key2: AES256Key) -> bool:
+    return key1.get_bytes() == key2.get_bytes()
+
+
+def sym_encrypt(data: bytes, key: AES256Key) -> bytes:
+    aesgcm = AESGCM(key.get_bytes())
+    nonce = os.urandom(12)
+    ciphertext: bytes = aesgcm.encrypt(nonce, data, None)
+    return nonce + ciphertext
+
+
+def sym_decrypt(bs: bytes, key: AES256Key) -> bytes:
+    aesgcm = AESGCM(key.get_bytes())
+    nonce, ciphertext = bs[:12], bs[12:]
+    decrypted_data: bytes = aesgcm.decrypt(nonce, ciphertext, None)
+    return decrypted_data
 
 
 def gen_asym_keys() -> tuple[RSAPrivateKey, RSAPublicKey]:
@@ -65,7 +107,7 @@ def str_to_asym_key(key_str_base_64: str, priv_pub: bool) -> RSAPrivateKey | RSA
     return key
 
 
-def compare_two_keys(key1: RSAPrivateKey | RSAPublicKey, key2: RSAPrivateKey | RSAPublicKey) -> bool:
+def compare_two_asym_keys(key1: RSAPrivateKey | RSAPublicKey, key2: RSAPrivateKey | RSAPublicKey) -> bool:
     if isinstance(key1, RSAPrivateKey) and isinstance(key2, RSAPrivateKey):
         key1_bytes = key1.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -93,7 +135,7 @@ def compare_two_keys(key1: RSAPrivateKey | RSAPublicKey, key2: RSAPrivateKey | R
         raise ValueError(f"Keys must be only RSAPrivateKey or RSAPublicKey.")
 
 
-def calc_key_hash(key: RSAPrivateKey | RSAPublicKey) -> str:
+def calc_asym_key_hash(key: RSAPrivateKey | RSAPublicKey) -> str:
     key_str = asym_key_to_str(key)
     hash_object = hashlib.sha256()
     hash_object.update(key_str.encode(encoding="utf-8"))
