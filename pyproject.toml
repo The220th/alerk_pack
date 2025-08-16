@@ -25,6 +25,7 @@ license = "MIT"
 dependencies = [
     "cryptography",
     "pydantic",
+    "requests",
 ]
 
 [project.urls]
