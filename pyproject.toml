@@ -23,6 +23,7 @@ classifiers = [
 ]
 license = "MIT"
 dependencies = [
+    "ksupk",
     "cryptography",
     "pydantic",
     "requests",

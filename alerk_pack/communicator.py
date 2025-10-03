@@ -8,7 +8,21 @@ import os
 import traceback
 import requests
 from alerk_pack.message import MessageWrapper, KMessage, MessageContainer, MessageEn
-from alerk_pack.crypto import AES256Key, RSAPrivateKey, RSAPublicKey, sym_encrypt, bytes2str
+from alerk_pack.crypto import AES256Key, RSAPrivateKey, RSAPublicKey, sym_encrypt, bytes2str, str_to_asym_key, str_to_sym_key
+
+
+def convert_strs_to_keys(priv_key: str, pub_key: str,
+                        sign_key: str, verif_key: str,
+                        alerk_pub_key: str, alerk_verify_key: str,
+                        sym_key: str | None) -> tuple[RSAPrivateKey, RSAPublicKey, RSAPrivateKey, RSAPublicKey, RSAPublicKey, RSAPublicKey, AES256Key | None]:
+    sym_key_ret = None if sym_key is None or sym_key == "" else str_to_sym_key(sym_key)
+    return (str_to_asym_key(priv_key, False),
+            str_to_asym_key(pub_key, True),
+            str_to_asym_key(sign_key, False),
+            str_to_asym_key(verif_key, True),
+            str_to_asym_key(alerk_pub_key, True),
+            str_to_asym_key(alerk_verify_key, True),
+            sym_key_ret)
 
 
 @singleton_decorator
@@ -18,7 +32,7 @@ class Kommunicator:
                  priv_key: RSAPrivateKey, public_key: RSAPublicKey,
                  sign_key: RSAPrivateKey, verify_key: RSAPublicKey,
                  alerk_pub_key: RSAPublicKey, alerk_verify_key: RSAPublicKey,
-                 sym_key: AES256Key):
+                 sym_key: AES256Key | None):
 
         self.url = url
 
@@ -28,7 +42,7 @@ class Kommunicator:
         self.verify_key: RSAPublicKey = verify_key
         self.alerk_pub_key: RSAPublicKey = alerk_pub_key
         self.alerk_verify_key: RSAPublicKey = alerk_verify_key
-        self.sym_key: AES256Key = sym_key
+        self.sym_key: AES256Key | None = sym_key
 
         self.task_queue = queue.Queue()
         self.running = False
